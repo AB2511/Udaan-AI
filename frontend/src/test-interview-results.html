@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Interview Results</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        // Mock data for testing
+        const mockResults = {
+            sessionId: 'test-session-123',
+            overallScore: 85,
+            completed: true
+        };
+
+        const mockSessionData = {
+            title: 'Software Developer Interview',
+            sessionType: 'technical',
+            role: 'Software Developer',
+            questions: [
+                { questionId: '1', question: 'Test question 1' },
+                { questionId: '2', question: 'Test question 2' }
+            ]
+        };
+
+        const mockDetailedFeedback = {
+            sessionId: 'test-session-123',
+            title: 'Software Developer Interview',
+            sessionType: 'technical',
+            targetRole: 'Software Developer',
+            overallScore: 85,
+            feedback: {
+                communication: { score: 8, feedback: 'Good communication skills' },
+                technicalAccuracy: { score: 9, feedback: 'Strong technical knowledge' },
+                confidence: { score: 7, feedback: 'Shows confidence in answers' },
+                problemSolving: { score: 8, feedback: 'Good problem-solving approach' },
+                overall: 'Great performance overall with room for improvement in confidence.',
+                strengths: ['Clear communication', 'Technical expertise', 'Problem-solving'],
+                improvementAreas: [
+                    { area: 'Confidence', suggestion: 'Practice more mock interviews', priority: 'medium' }
+                ],
+                nextSteps: ['Practice behavioral questions', 'Work on presentation skills']
+            },
+            questionFeedback: [
+                {
+                    questionId: '1',
+                    question: 'Explain the concept of closures in JavaScript',
+                    category: 'technical',
+                    userAnswer: 'A closure is a function that has access to variables in its outer scope...',
+                    timeSpent: 120,
+                    feedback: {
+                        content: 'Good explanation with clear examples',
+                        strengths: ['Clear explanation', 'Good examples'],
+                        improvements: ['Could mention more use cases'],
+                        score: 8
+                    }
+                }
+            ],
+            sessionInfo: {
+                duration: 1800,
+                completedAt: '2024-01-15T10:30:00Z',
+                progress: {
+                    totalQuestions: 2,
+                    answeredQuestions: 2,
+                    percentage: 100
+                }
+            }
+        };
+
+        // Mock interview service
+        const mockInterviewService = {
+            getInterviewFeedback: async (sessionId) => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve({
+                            success: true,
+                            data: mockDetailedFeedback
+                        });
+                    }, 1000);
+                });
+            }
+        };
+
+        // Simple InterviewResults component for testing
+        const InterviewResults = ({ results, sessionData, onRestart, onClose }) => {
+            const [loading, setLoading] = React.useState(true);
+            const [detailedFeedback, setDetailedFeedback] = React.useState(null);
+            const [activeTab, setActiveTab] = React.useState('overview');
+
+            React.useEffect(() => {
+                if (results && results.sessionId) {
+                    fetchDetailedFeedback(results.sessionId);
+                }
+            }, [results]);
+
+            const fetchDetailedFeedback = async (sessionId) => {
+                try {
+                    setLoading(true);
+                    const response = await mockInterviewService.getInterviewFeedback(sessionId);
+                    if (response.success) {
+                        setDetailedFeedback(response.data);
+                    }
+                } catch (error) {
+                    console.error('Error fetching detailed feedback:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            if (loading) {
+                return (
+                    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                        <div className="flex items-center justify-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                            <span className="ml-4 text-gray-600">Loading detailed feedback...</span>
+                        </div>
+                    </div>
+                );
+            }
+
+            const feedback = detailedFeedback || results;
+            const overallScore = feedback?.overallScore || 0;
+
+            return (
+                <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-t-lg">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-3xl font-bold mb-2">Interview Complete! 🎉</h1>
+                                <p className="text-blue-100 text-lg">
+                                    {feedback?.title || sessionData?.title || 'Mock Interview Session'}
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-4xl font-bold px-6 py-3 rounded-lg bg-green-100 text-green-600">
+                                    {overallScore}%
+                                </div>
+                                <p className="text-blue-100 mt-2">Overall Score</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-8">
+                        <div className="space-y-8">
+                            {/* Performance Summary */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+                                    <h3 className="text-lg font-semibold text-green-800 mb-2">Strengths</h3>
+                                    <div className="space-y-2">
+                                        {feedback?.feedback?.strengths?.length > 0 ? (
+                                            feedback.feedback.strengths.slice(0, 3).map((strength, index) => (
+                                                <div key={index} className="flex items-center text-green-700">
+                                                    <span className="text-green-500 mr-2">✓</span>
+                                                    <span className="text-sm">{strength}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-green-700 text-sm">Great job completing the interview!</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                    <h3 className="text-lg font-semibold text-blue-800 mb-2">Questions Answered</h3>
+                                    <div className="text-3xl font-bold text-blue-600">
+                                        {feedback?.sessionInfo?.progress?.answeredQuestions || feedback?.questionFeedback?.length || 0}
+                                        <span className="text-lg text-blue-500">
+                                            /{feedback?.sessionInfo?.progress?.totalQuestions || sessionData?.questions?.length || 0}
+                                        </span>
+                                    </div>
+                                    <p className="text-blue-600 text-sm mt-2">
+                                        {feedback?.sessionInfo?.progress?.percentage || 0}% Complete
+                                    </p>
+                                </div>
+
+                                <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                                    <h3 className="text-lg font-semibold text-purple-800 mb-2">Areas to Improve</h3>
+                                    <div className="space-y-2">
+                                        {feedback?.feedback?.improvementAreas?.length > 0 ? (
+                                            feedback.feedback.improvementAreas.slice(0, 2).map((area, index) => (
+                                                <div key={index} className="flex items-center text-purple-700">
+                                                    <span className="text-purple-500 mr-2">→</span>
+                                                    <span className="text-sm">{area.area || area}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-purple-700 text-sm">Keep up the great work!</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Overall Feedback */}
+                            {feedback?.feedback?.overall && (
+                                <div className="bg-gray-50 p-6 rounded-lg">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Overall Feedback</h3>
+                                    <p className="text-gray-700 leading-relaxed">{feedback.feedback.overall}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="bg-gray-50 px-8 py-6 rounded-b-lg border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm text-gray-600">
+                                {feedback?.sessionInfo?.completedAt && (
+                                    <span>Completed on {new Date(feedback.sessionInfo.completedAt).toLocaleDateString()}</span>
+                                )}
+                            </div>
+                            <div className="space-x-4">
+                                <button
+                                    onClick={onRestart}
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                >
+                                    Take Another Interview
+                                </button>
+                                <button
+                                    onClick={onClose}
+                                    className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+                                >
+                                    Back to Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Test App
+        const TestApp = () => {
+            return (
+                <div className="min-h-screen bg-gray-50 py-8">
+                    <InterviewResults
+                        results={mockResults}
+                        sessionData={mockSessionData}
+                        onRestart={() => console.log('Restart clicked')}
+                        onClose={() => console.log('Close clicked')}
+                    />
+                </div>
+            );
+        };
+
+        ReactDOM.render(<TestApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
