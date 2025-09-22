@@ -55,6 +55,7 @@ cd frontend && npm run dev
 * **Frontend:** [http://localhost:5173](http://localhost:5173)
 * **Backend:** [http://localhost:3000](http://localhost:3000)
 * **Health Check:** [http://localhost:3000/api/health](http://localhost:3000/api/health)
+* **Live:** [Demo](https://udaan-ai.web.app)
 
 ---
 
